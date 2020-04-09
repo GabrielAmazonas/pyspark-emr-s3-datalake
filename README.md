@@ -1,8 +1,5 @@
 # PySpark ETL
 
-## To run this project locally:
-
-
 # Data Lakes with PySpark and S3
 
 ### Concepts:

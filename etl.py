@@ -1,18 +1,13 @@
 import configparser
 import os
+import sys
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col
 from pyspark.sql.functions import hour, date_format, monotonically_increasing_id, \
     from_unixtime, to_timestamp
 from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, IntegerType, LongType)
-
-config = configparser.ConfigParser()
-config.read('dl.cfg')
-
-os.environ['AWS_ACCESS_KEY_ID'] = config['AWS']['AWS_ACCESS_KEY_ID']
-os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS']['AWS_SECRET_ACCESS_KEY']
-
 
 def create_spark_session():
     spark = SparkSession \
@@ -28,9 +23,6 @@ def get_seconds_since_unix(milliseconds):
 
 
 def process_song_data(spark, input_data, output_data):
-    # get filepath to song data file
-    # read song data file
-
     song_data = input_data + "song_data/*/*/*/*.json"
 
     song_data_schema = StructType([
@@ -134,11 +126,11 @@ def process_log_data(spark, input_data, output_data):
         .join(
         time_table.select('timestamp', 'start_time', col('year').alias('time_year'), col('month').alias('time_month')), \
         df.timestamp == time_table.timestamp) \
-        .select('start_time', 'level', 'song_id', 'artist_id', 'location', \
-                col('userId').alias('user_id'), \
-                col('sessionId').alias('session_id'), \
-                col('userAgent').alias('user_agent'), \
-                col('time_year').alias('year'), \
+        .select('start_time', 'level', 'song_id', 'artist_id', 'location',
+                col('userId').alias('user_id'),
+                col('sessionId').alias('session_id'),
+                col('userAgent').alias('user_agent'),
+                col('time_year').alias('year'),
                 col('time_month').alias('month'))
 
     songplays_table = songplays_table.withColumn('songplay_id', monotonically_increasing_id())
@@ -146,13 +138,25 @@ def process_log_data(spark, input_data, output_data):
     # write songplays table to parquet files partitioned by year and month
     songplays_table.write.partitionBy('year', 'month').mode('overwrite').parquet(output_data + 'songplays')
 
-    songplays_table.show()
-
 
 def main():
+    if len(sys.argv) == 3:
+        # aws cluster mode
+        input_data = sys.argv[1]
+        output_data = sys.argv[2]
+    else:
+        # local mode
+        config = configparser.ConfigParser()
+        config.read('./dl.cfg')
+
+        os.environ['AWS_ACCESS_KEY_ID'] = config['AWS']['AWS_ACCESS_KEY_ID']
+        os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS']['AWS_SECRET_ACCESS_KEY']
+
+        input_data = config['DATALAKE']['INPUT_DATA']
+        output_data = config['DATALAKE']['OUTPUT_DATA']
+
+    os.popen('sh ./create_emr_default_roles.sh')
     spark = create_spark_session()
-    input_data = "s3a://udacity-dend/"
-    output_data = "s3a://udacity-dend-pyspark/"
 
     process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)
