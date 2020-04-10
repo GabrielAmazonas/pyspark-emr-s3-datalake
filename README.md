@@ -1,6 +1,4 @@
-# PySpark ETL
-
-# Data Lakes with PySpark and S3
+# Data Lakes with PySpark, EMR and S3
 
 ### Concepts:
 
@@ -102,28 +100,22 @@ The target schema should look as follows:
     Contains the needed AWS Keys to access s3.
 
 ### Running this project:
-- Make sure you have java8 installed and set as default.
-
-    - On linux
-    ```
-    sudo apt install openjdk-8-jdk
-    
-    sudo update-alternatives --config java
-    ```
-    Choose Java 8 after running the command above and then
-    Check if the Java 8 version was set propperly
-    
-     ```
-    java -version
-     ```
 - Update dl.cfg with
     -  AWS Access Keys
+    -  s3 bucket names to create
+    
+- Running on AWS EMR:
+    - Install / Setup python 3
+    - Install AWS CLI
+    - Run `create_emr_default_roles.sh`
+    - Run `emr_deployment.py`
+    - Log in to your aws console and check your s3 / EMR services.
 
-- Update etl.py with a new public s3 bucket address assigned to `output_data`
-
-- Run: `etl.py`
-- Check your created `output_data` s3 bucket.
-
+- Running locally
+    - Install and set `java8` as the default java version
+    - Run `etl.py`
+    - Log in to your aws console and check your s3 / EMR services.
+    
 ### AWS Services:
 
     S3:
