@@ -119,7 +119,7 @@ The target schema should look as follows:
 ### AWS Services:
 
     S3:
-        Object storage service. Commonly used as a Data Lake central data storage layer. In this project, data from application logs is stored on s3 and should be Extracted, Transformed and Loaded into redshift.
+        Object storage service. Commonly used as a Data Lake central data storage layer. In this project, data from application logs is stored on s3 and should be Extracted, Transformed and Loaded into s3 in an optimized schema.
     
 
     EMR:
